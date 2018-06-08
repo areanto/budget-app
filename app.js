@@ -1,18 +1,18 @@
 // BUDGET CONTROLLLER
-var budgetController = (function () {
+var budgetController = (function() {
 
     // each new item needs description and a value + distinguish by #id income vs. expense
     
     
     // create a function constructor for income and expense types
 
-    var Expenses = function(id, deescription,value){
+    var Expense = function(id, description, value){
         this.id = id;
         this.description = description;
         this.value = value;
     };
 
-    var Incomes = function(id, deescription,value){
+    var Income = function(id, description, value){
         this.id = id;
         this.description = description;
         this.value = value;
@@ -20,15 +20,54 @@ var budgetController = (function () {
 
     // Data store
     var data = {
+        
         allItems: {
-            exp:[],
-            inc:[]
-        },
+            exp: [],
+            inc: []
+        },        
         totals: {
             exp: 0,
             inc: 0
         }
+    };
+    
+    // create public method to allow other modules to add new items to the data structure
+    return {
+        addItem: function(type, des, val) {
+            var newItem, ID;
+            
+            // assign a unique id to each new expense or income item
+            // ID = last ID + 1
+            
+            // create new ID
+            if (data.allItems[type].length > 0){
+                ID = data.allItems[type][data.allItems[type].length - 1].id + 1;
+            } else {
+                ID = 0;
+            }
+            // console.log('The new ID for this item is: ' + ID);
+            
+            // create new item based on 'inc' or 'exp' type
+            if (type === "exp") {
+                newItem = new Expense(ID, des, val);
+            } else if (type === "inc") {
+                newItem = new Income(ID, des, val);
+            }
+            
+            // add new exp or inc to the end of the allItems.exp or allItems.inc array
+            data.allItems[type].push(newItem);
+            
+            // return the new item
+            return newItem;
+            
+        }, 
+        
+        testing: function() {
+            console.log(data);
+        }
+        
     }
+
 })();
 
 
@@ -93,7 +132,7 @@ var UIController = (function () {
         var input = UICtrl.getInput();
         
         // 2. Add the item to the budget controller
-        
+        newItem = budgetCtrl.addItem(input.type, input.description, input.value);
         
         // 3. Add the new item to the UI
         
