@@ -18,6 +18,20 @@ var budgetController = (function () {
         this.value = value;
     };
 
+    var calculateTotal = function(type) {
+        
+        var sum = 0;
+        
+        // add all values in the array depending on if it's 'exp' or 'inc'
+        data.allItems[type].forEach(function(currentElement){
+            sum += currentElement.value;
+        });
+        
+        // store the totals in the data object
+        data.totals[type] = sum;
+        
+    };
+
     // Data store
     var data = {
 
@@ -28,7 +42,9 @@ var budgetController = (function () {
         totals: {
             exp: 0,
             inc: 0
-        }
+        }, 
+        budget: 0,
+        percentage: -1 // because evaluated as non-existent
     };
 
     // create public method to allow other modules to add new items to the data structure
@@ -60,6 +76,40 @@ var budgetController = (function () {
             // return the new item
             return newItem;
 
+        },
+
+        calculateBudget: function() {
+            
+            // calculate total income and expenses
+            calculateTotal('exp');
+            calculateTotal('inc');
+            
+            // calculate budget: income - expenses
+            data.budget = data.totals.inc - data.totals.exp;
+            
+            // calculate percentage of income that has already been spent
+            if (data.totals.inc > 0){ 
+                // if income > 0, then calculate the percent expenses
+                data.percentage = Math.round( (data.totals.exp / data.totals.inc) * 100 );
+                
+            } else {
+                // display nothing
+                data.percentage = -1;
+                
+            }
+            
+        },
+        
+        getBudget: function(){
+            
+            // this method will just return the budget items
+            return {
+                budget: data.budget,
+                totalInc: data.totals.inc,
+                totalExp: data.totals.exp,
+                percentage: data.percentage
+            }
+            
         },
 
         // for testing
@@ -179,13 +229,13 @@ var controller = (function (budgetCtrl, UICtrl) {
     var updateBudget = function () {
 
         // 1. Calculate the budget
-
+        budgetCtrl.calculateBudget();
 
         // 2. Return the budget
-
+        var budget = budgetCtrl.getBudget();
 
         // 3. Display the budget on the UI
-
+        console.log(budget);
 
     };
 
